@@ -9,42 +9,50 @@
         <div class="row">
           <div class="col-lg-3 pr-lg-4 order-lg-1 order-2">
             <div class="img-circle">
-              <a href="author.html"><img src="{% if query.user.display_pic %}{{ query.user.display_pic.url }}{% else %}{% static 'images/defaultprofile.jpg' %}{% endif %}" alt=""></a>
+              <a href=""><img src="{% if query.user.display_pic %}{{ query.user.display_pic.url }}{% else %}{% static 'images/defaultprofile.jpg' %}{% endif %}" alt=""></a>
             </div>
-            <h4 class="about-title">About {{query.user}}</h4>
-              <p class="mr-lg-3">{{query.user.bio}} <br>
+            <h4 class="about-title mt-2">About {{query.user}}</h4>
+              <p class="mr-lg-3 mt-3">{{query.user.bio}} <br>
           </div>
           <div class="col-lg-9 pl-lg-0 order-lg-2 order-1">
-            <div class="message">
+            <div class="message ml-5">
               <ul class="author-date mb-4 d-flex align-items-center">
                 <li><span class="fa fa-clock-o" aria-hidden="true"></span> {{query.date}}</li>
-                <li><span class="fa fa-commenting-o" aria-hidden="true"></span> <a href="#reply">12 Comments</a></li>
+                <li><span class="fa fa-commenting-o" aria-hidden="true"></span> <a href="#reply">{{answers_count}} Reply</a></li>
                 <li><span class="fa fa-clock-o" aria-hidden="true"></span> {{query.time}}</li>
               </ul>
               <h4 class="blog_post_title">{{query.query}}</h4>
-              <div class="row mt-4">
+              <div class="row mt-5">
                 <div class="col-lg-8 pr-lg-4 order-lg-1 order-2">
                   <div class="single-post-content">
-                      <a href="" class="col-lg-6 blog-article-posts bg-color-one">
-                        <div class="blog-post d-flex flex-wrap align-content-between">
-                          <div class="post-content">
-                            <ul class="author-date mb-4 d-flex align-items-center">
-                              <li class="circle-lg avatar"><img src="{% static 'images/author4.jpg' %}" alt=""></li>
-                              <li>by <b>Daniel Roberto</b></li>
-                              <li><span class="fa fa-clock-o" aria-hidden="true"></span> Feb 16, 2020</li>
-                            </ul>
-                            <p class="mb-4">Lorem ipsum dolor sit amet,Ea consequuntur
-                                illum facere aperiam sequi optio
-                                dolor set consectetur.Ea ipsum sed consequuntur illum facere aperiam sequi optio consectetur
-                                adipisicing elitFuga, suscipit totam animi consequatur saepe. Lorem ipsum dolor sit amet,
-                                illum facere sequi optio elit..
-                            </p>
-                            <ul style="display: -webkit-inline-box;">
-                                <li ><span class="fa fa-thumbs-up" aria-hidden="true"></span> <a href="#">5 Likes</a></li> 
-                            </ul>
-                          </div>
-                        </div>
-                      </a>
+                    {% if answers %}
+                        {% for answer in answers %}
+                            <a href="" class="blog-article-posts">
+                                <div class="blog-post d-flex flex-wrap  mb-5">
+                                    <div class="post-content">
+                                        <ul class="author-date mb-4 d-flex align-items-center">
+                                            <li class="circle-lg avatar">
+                                                <img src="{% if answer.user.display_pic %}{{ answer.user.display_pic.url }}{% else %}{% static 'images/defaultprofile.jpg' %}{% endif %}" alt="">
+                                            </li>
+                                            <li>by <b>{{ answer.user }}</b></li>
+                                            <li><span class="fa fa-clock-o" aria-hidden="true"></span> {{ answer.date }}</li>
+                                        </ul>
+                                        <div class="ml-5">
+                                            <p class="mb-4">{{ answer.body }}</p>
+                                            <ul style="display: -webkit-inline-box;">
+                                                <li>
+                                                    <i class="like-icon" data-answer-id="{{ answer.id }}"></i>
+                                                    <span class="like-count" id="like-count-{{ answer.id }}">{{ answer.liked_by.count }}</span> Likes
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <p>No replies yet ...</p>
+                    {% endif %}
                   </div>
                 </div>
                 <div class="col-lg-4 mb-lg-0 mb-4 order-lg-2 order-1">
@@ -52,8 +60,9 @@
                     <a href="#reply"><span class="fa fa-commenting-o" aria-hidden="true"></span> Leave your answers</a>
                   </div>
                   <div class="blog-subscribe p-3 mt-lg-2">
-                    <form action="#" method="post" class="subscribe-form">
-                        <textarea class="form-control mt-2 mb-2" name="query" id="exampleFormControlTextarea1" rows="3" required style="width:290px"></textarea>
+                    <form action="" method="post" class="subscribe-form">
+                        {% csrf_token %}
+                        <textarea class="form-control mt-2 mb-2" name="answer" id="exampleFormControlTextarea1" rows="3" required style="width:290px"></textarea>
                       <button type="submit" class="btn btn-primary btn-theme">Submit</button>
                     </form>
                   </div>
@@ -64,5 +73,63 @@
         </div>
       </div>
     </section>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".like-icon").each(function () {
+                var answerId = $(this).data("answer-id");
+                var likeIcon = $(this);
+                var userLiked = likeIcon.data("user-liked");
+    
+                // Set the initial icon class based on userLiked
+                if (userLiked) {
+                    likeIcon.removeClass("far fa-thumbs-up").addClass("fa fa-thumbs-up");
+                } else {
+                    likeIcon.removeClass("fa fa-thumbs-up").addClass("far fa-thumbs-up");
+                }
+    
+                likeIcon.on("click", function () {
+                    console.log("Like icon clicked");
+                    event.preventDefault();
+    
+                    // Your existing AJAX request code
+                    var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/userside/like-answer",
+                        data: {
+                            csrfmiddlewaretoken: csrftoken,
+                            answer_id: answerId,
+                        },
+                        headers: {
+                            "X-CSRFToken": csrftoken,
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        success: function (data) {
+                            var likeCount = $("#like-count-" + answerId);
+                            likeCount.text(data.likes);
+    
+                            // Toggle the like icon based on 'liked' value
+                            if (data.liked) {
+                                likeIcon.removeClass("far fa-thumbs-up").addClass("fa fa-thumbs-up");
+                            } else {
+                                likeIcon.removeClass("fa fa-thumbs-up").addClass("far fa-thumbs-up");
+                            }
+    
+                            // Update the userLiked data attribute based on the updated 'liked' value
+                            userLiked = data.user_liked;
+                            likeIcon.data("user-liked", userLiked);
+                        },
+                        error: function () {
+                            // Handle errors
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    
     
     {% endblock %}

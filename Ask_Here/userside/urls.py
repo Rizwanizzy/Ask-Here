@@ -5,5 +5,6 @@ urlpatterns = [
 
     path('home', views.home , name='home'),
     path('question/<int:id>', views.question , name='question'),
-    # path('logout', views.auth_logout , name='logout'),
+    path('like-answer', views.like_answer, name='like_answer'),
+    path('profile', views.profile, name='profile'),
 ]

@@ -13,8 +13,8 @@ htmlcov/
 .vscode/
 
 # Static files
-/Ask_Here/static
-.media/
+/Ask_Here/static/
+/Ask_Here/media/
 
 # Environment and deployment files
 .askenv

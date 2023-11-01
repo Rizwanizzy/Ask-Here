@@ -12,7 +12,7 @@
 				<h3 class="mb-md-5 mb-4">Sign Up Here.
 			</div>
 			<form action="" method="post" class="">
-        {% csrf_token %}
+        		{% csrf_token %}
 				<div class="main-input">
 					<input type="text" name="username" placeholder="Enter your username" class="contact-input" required />
 					<input type="email" name="email" placeholder="Enter your email" class="contact-input" required />
@@ -20,16 +20,16 @@
 					<input type="password" name="password2" placeholder="confirm password" class="contact-input" />
 				</div>
 				<div class="text-right" style="display:flex;justify-content:flex-end">
-          <p class="mr-3">Already have an account <a href="{% url 'login' %}">login</a></p>
+          			<p class="mr-3">Already have an account <a href="{% url 'login' %}">login</a></p>
 					<button class="btn-primary btn theme-button">Register</button>
 				</div>
-        {% if messages %}
-        <ul class="messages mt-3">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="height:50px;padding:10px">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+				{% if messages %}
+				<ul class="messages mt-3">
+					{% for message in messages %}
+					<li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="height:50px;padding:10px">{{ message }}</li>
+					{% endfor %}
+				</ul>
+				{% endif %}
 			</form>
 		</div>
 	</div>
