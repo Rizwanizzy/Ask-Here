@@ -1,4 +1,4 @@
-# Let's Football
+# ASK ME..
 
 The ASK ME.. is a Django web application that helps you to post your questions and get answers by other.
 
