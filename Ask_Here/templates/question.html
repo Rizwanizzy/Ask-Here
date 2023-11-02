@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load custom_filters %}
+
 {% block content %}
     
     <section class="w3l-blog-single py-5 mt-5">
@@ -40,10 +42,10 @@
                                         <div class="ml-5">
                                             <p class="mb-4">{{ answer.body }}</p>
                                             <ul style="display: -webkit-inline-box;">
-                                                <li>
-                                                    <i class="like-icon" data-answer-id="{{ answer.id }}"></i>
-                                                    <span class="like-count" id="like-count-{{ answer.id }}">{{ answer.liked_by.count }}</span> Likes
-                                                </li>
+                                              <li>
+                                                <i class="like-icon {% if user_liked_answers|get_item:answer.id %}fa fa-thumbs-up{% else %}far fa-thumbs-up{% endif %}" data-answer-id="{{ answer.id }}"></i>
+                                                <span class="like-count" id="like-count-{{ answer.id }}">{{ answer.liked_by.count }}</span> Likes
+                                              </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -77,58 +79,51 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $(".like-icon").each(function () {
-                var answerId = $(this).data("answer-id");
-                var likeIcon = $(this);
-                var userLiked = likeIcon.data("user-liked");
+      $(document).ready(function () {
+        $(".like-icon").each(function () {
+            var answerId = $(this).data("answer-id");
+            var likeIcon = $(this);
+            var userLiked = likeIcon.data("user-liked");
     
-                // Set the initial icon class based on userLiked
-                if (userLiked) {
-                    likeIcon.removeClass("far fa-thumbs-up").addClass("fa fa-thumbs-up");
-                } else {
-                    likeIcon.removeClass("fa fa-thumbs-up").addClass("far fa-thumbs-up");
-                }
+            likeIcon.on("click", function () {
+                console.log("Like icon clicked");
+                event.preventDefault();
     
-                likeIcon.on("click", function () {
-                    console.log("Like icon clicked");
-                    event.preventDefault();
+                // Your existing AJAX request code
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $.ajax({
+                    type: "POST",
+                    url: "/userside/like-answer",
+                    data: {
+                        csrfmiddlewaretoken: csrftoken,
+                        answer_id: answerId,
+                    },
+                    headers: {
+                        "X-CSRFToken": csrftoken,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    success: function (data) {
+                        var likeCount = $("#like-count-" + answerId);
+                        likeCount.text(data.likes);
     
-                    // Your existing AJAX request code
-                    var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-                    $.ajax({
-                        type: "POST",
-                        url: "/userside/like-answer",
-                        data: {
-                            csrfmiddlewaretoken: csrftoken,
-                            answer_id: answerId,
-                        },
-                        headers: {
-                            "X-CSRFToken": csrftoken,
-                            "X-Requested-With": "XMLHttpRequest",
-                        },
-                        success: function (data) {
-                            var likeCount = $("#like-count-" + answerId);
-                            likeCount.text(data.likes);
-    
-                            // Toggle the like icon based on 'liked' value
-                            if (data.liked) {
-                                likeIcon.removeClass("far fa-thumbs-up").addClass("fa fa-thumbs-up");
-                            } else {
-                                likeIcon.removeClass("fa fa-thumbs-up").addClass("far fa-thumbs-up");
-                            }
-    
-                            // Update the userLiked data attribute based on the updated 'liked' value
-                            userLiked = data.user_liked;
-                            likeIcon.data("user-liked", userLiked);
-                        },
-                        error: function () {
-                            // Handle errors
+                        // Toggle the like icon based on 'liked' value
+                        if (data.liked) {
+                            likeIcon.removeClass("far fa-thumbs-up").addClass("fa fa-thumbs-up");
+                        } else {
+                            likeIcon.removeClass("fa fa-thumbs-up").addClass("far fa-thumbs-up");
                         }
-                    });
+    
+                        // Update the userLiked data attribute based on the updated 'liked' value
+                        userLiked = data.user_liked;
+                        likeIcon.data("user-liked", userLiked);
+                    },
+                    error: function () {
+                        // Handle errors
+                    }
                 });
             });
         });
+    });
     </script>
     
     
