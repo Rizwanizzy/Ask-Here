@@ -72,6 +72,12 @@ Before you begin, make sure you have the following prerequisites installed on yo
 
 6. Run database migrations:
 
+   first makemigrations for both django apps , that is authentication , userside 
+
+   python manage.py makemigrations authentication
+
+   python manage.py makemigrations userside 
+
    python manage.py migrate
 
    
