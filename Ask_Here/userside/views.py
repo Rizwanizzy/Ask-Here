@@ -29,8 +29,12 @@ def question(request,id):
 
     if request.method == 'POST':
         answer = request.POST['answer']
-        Answer.objects.create(user=user,question=query,body=answer)
-        return redirect('question',id=id)
+        if user.is_authenticated:
+            print('the user is: ',user)
+            Answer.objects.create(user=user,question=query,body=answer)
+            return redirect('question',id=id)
+        else:
+            return redirect('login')
     answers_count = answers.count()
     context = {
         'query':query,
